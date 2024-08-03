@@ -6,6 +6,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from store_db import DocumentProcessor  # DocumentProcessor를 사용한다고 가정합니다.
 
 # 환경 변수 로드 (API 키 등)
