@@ -1,14 +1,24 @@
-import os
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from app.store_db import load_and_index_documents
+from app.rag_chain import get_rag_response
 
-from flask import Flask
+app = FastAPI()
 
-app = Flask(__name__)
+class QueryRequest(BaseModel):
+    question: str
 
-@app.route("/")
-def hello_world():
-  """Example Hello World route."""
-  name = os.environ.get("NAME", "World")
-  return f"Hello {name}!"
+# Initialize retriever
+retriever = load_and_index_documents("./data/academic resources")
+
+@app.post("/query/")
+async def query_rag(request: QueryRequest):
+    try:
+        response = get_rag_response(retriever, request.question)
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-  app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 3000)))
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
