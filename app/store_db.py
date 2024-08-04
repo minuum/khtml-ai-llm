@@ -4,6 +4,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
+import chromadb
 from dotenv import load_dotenv
 from langchain.docstore.document import Document
 
@@ -44,13 +45,24 @@ class DocumentProcessor:
         chunks = chunk_splitter.split_documents(documents)
         print(f"Split documents into {len(chunks)} chunks.")
         return chunks
+    def save_to_http(self, chunks):
+        if not chunks:
+            print("No chunks to save to VectorDB.")
+            return None
+        print("Save VectorDB")
+
+        chromadb_client = chromadb.HttpClient(host="localhost", port=8000)
+        print(chromadb_client.list_collections())
+        
+        collection = chromadb_client.create_collection(name="pdf_test_240531")
+        print(chromadb_client.list_collections())
 
     def save_db(self, chunks):
         if not chunks:
             print("No chunks to save to VectorDB.")
             return None
         print("Save VectorDB")
-        vectordb = Chroma.from_documents(documents=chunks, embedding=self.embeddings, persist_directory=self.vector_db_path)
+        vectordb = Chroma.from_documents(collection_name=vectordb1,documents=chunks, embedding=self.embeddings, persist_directory=self.vector_db_path)
         vectordb.persist()
         return vectordb.as_retriever()
     ##자동저장
